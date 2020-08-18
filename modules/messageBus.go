@@ -21,7 +21,7 @@ type RouteMessage struct {
 	Sid int `json:"sid"`
 	Uid string `json:"uid"`
 	Dir string `json:"router"`
-	Data []byte `json:"data"`
+	Data interface{} `json:"data"`
 	GType int `json:"gtype,omitempty"`
 	Gid int `json:"gid,omitempty"`
 }
@@ -55,6 +55,8 @@ func NewMessageBus(
 		stopChan: make(chan bool),
 		writeChan: make(chan []byte, 1000),
 		readChan: make(chan *RouteMessage, 1000),
+		sid: 10001,
+		gamesid: 30011,
 	}
 	if err := mb.configure(); err != nil {
 		return nil, err
@@ -80,11 +82,14 @@ func (mb *MessageBus) sendMsgToGamex() error {
 func (mb *MessageBus) Init() error {
 	err := mb.createRedisClient()
 	if err != nil {
-		go mb.writeData()
-		go mb.readData()
-		go mb.handleMessage()
+		return err
 	}
-	return err
+	
+	go mb.writeData()
+	go mb.readData()
+	go mb.handleMessage()
+
+	return nil
 }
 
 func (mb *MessageBus) createRedisClient() error {
@@ -142,17 +147,17 @@ func (mb *MessageBus) writeData() {
 	qout := fmt.Sprintf("mq_%v", mb.gamesid)
 	logger.Log.Infof("%d goroutine write start, qout:[%v]", mb.sid, qout)
 	
-	for str := range mb.writeChan {
-		if len(str) == 0 {
+	for data := range mb.writeChan {
+		if len(data) == 0 {
 			logger.Log.Debugf("[%v] recv EOF, ready to exit", qout)
 			break
 		}
 
-		if err := mb.pubsubRedis.RPush(qout, str).Err(); err != nil {
-			logger.Log.Errorf("[%v] rc.RPush err:%v, value:%v", qout, err, str)
+		if err := mb.pubsubRedis.RPush(qout, data).Err(); err != nil {
+			logger.Log.Errorf("[%v] rc.RPush err:%v, value:%v", qout, err, string(data))
 		} else {
 			total := atomic.AddUint32(&mb.msgCount, 1)
-			logger.Log.Debugf("[%v] RPush:%v, total:%v", qout, str, total)
+			logger.Log.Debugf("[%v] RPush:%v, total:%v", qout, string(data), total)
 		}
 	}
 
@@ -200,9 +205,14 @@ func (mb *MessageBus) handleMessage() {
 	}
 }
 
-func (mb *MessageBus) SendMsgToClient(route string, uid string, data []byte) {
+func (mb *MessageBus) SendMsgToClient(route string, uid string, msg interface{}) {
 	uids := [] string { uid }
-	pitaya.SendPushToUsers(route, data, uids, "connector")
+	data, err := json.Marshal(msg)
+	if err != nil {
+		logger.Log.Errorf("json.Marshal err:%v, msg:%v, route:%v, uid:%v", err, msg, route, uid)
+	} else {
+		pitaya.SendPushToUsers(route, data, uids, "connector")
+	}
 }
 
 func (mb *MessageBus) SendMsgToGameX(uid string, data []byte, dir string) error {
@@ -210,18 +220,23 @@ func (mb *MessageBus) SendMsgToGameX(uid string, data []byte, dir string) error 
 		Sid: mb.sid,
 		Uid: uid,
 		Dir: dir,
-		Data: data,
 		GType: 13,
 		Gid:30011,
 	}
 
-	data, err := json.Marshal(&msg)
+	err := json.Unmarshal(data, &msg.Data)
+	if err != nil {
+		logger.Log.Errorf("json.Marshal data failed, data:%v, err:%v", string(data), err)
+		return err
+	}
+
+	str, err := json.Marshal(&msg)
 	if err != nil {
 		logger.Log.Errorf("json.Marshal failed, msg:%v, err:%v", msg, err)
 		return err
 	}
 
-	mb.writeChan <- data
+	mb.writeChan <- str
 
 	return err
 }

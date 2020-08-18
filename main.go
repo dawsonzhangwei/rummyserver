@@ -19,6 +19,11 @@ import (
 )
 
 func configureBackend() {
+	auth := services.NewAuth()
+	pitaya.Register(auth,
+		component.WithName("auth"),
+		component.WithNameFunc(strings.ToLower))
+
 	room := services.NewRoom()
 	pitaya.Register(room,
 		component.WithName("room"),
@@ -30,7 +35,7 @@ func configureBackend() {
 		component.WithNameFunc(strings.ToLower))
 
 	busConfig := viper.New()
-	busConfig.SetDefault("rummy.redis.addr", "20.10.1.51:6379")
+	busConfig.SetDefault("rummy.redis.addr", "20.10.1.82:6379")
 	busConfig.SetDefault("rummy.redis.db", 3)
 	msgBus, err := modules.NewMessageBus(config.NewConfig(busConfig))
 	if err != nil {

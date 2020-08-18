@@ -2,8 +2,7 @@ package services
 
 import (
 	"context"
-	"encoding/json"
-
+	
 	"github.com/topfreegames/pitaya"
 	"github.com/topfreegames/pitaya/component"
 
@@ -21,10 +20,6 @@ type (
 		Code int `json:"code"`
 		Result string `json:"result"`
 	}
-
-	Message struct {
-		Data json.RawMessage
-	}
 )
 
 func NewRouter() * Router {
@@ -35,7 +30,7 @@ func NewRouter() * Router {
 func (r *Router) AfterInit() {
 }
 
-func (r *Router) C2G(ctx context.Context, msg *Message) {
+func (r *Router) C2G(ctx context.Context, data []byte) {
 	logger := pitaya.GetDefaultLoggerFromCtx(ctx)
 
 	if r.msgBus == nil {
@@ -47,13 +42,13 @@ func (r *Router) C2G(ctx context.Context, msg *Message) {
 	}
 
 	if r.msgBus == nil {
-		logger.Errorf("Router, C2G msg:%v, msgBus is nil", msg)
+		logger.Errorf("Router, C2G msg:%v, msgBus is nil", string(data))
 		return
 	}
 
 	s := pitaya.GetSessionFromCtx(ctx)
 	
-	r.msgBus.SendMsgToGameX(s.UID(), msg.Data, "c2g")
+	r.msgBus.SendMsgToGameX(s.UID(), data, "c2g")
 
-	logger.Debugf("c2g:%v", msg.Data)
+	logger.Debugf("c2g:%v", string(data))
 }

@@ -16,14 +16,21 @@ type MsgLogin struct {
 	Nick string `json:"nick"`
 }
 
-func NewAuthen() *Auth {
+type LoginResponse struct {
+	Code int `json:"code"`
+	Result string `json:"result"`	
+}
+
+func NewAuth() *Auth {
 	return &Auth{}
 }
 
-func (a *Auth) login(ctx context.Context, msg *MsgLogin) {
+func (a *Auth) Login(ctx context.Context, msg *MsgLogin)(*LoginResponse, error) {
 	logger := pitaya.GetDefaultLoggerFromCtx(ctx) // The default logger contains a requestId, the route being executed and the sessionId
 	s := pitaya.GetSessionFromCtx(ctx)
 	s.Bind(ctx, msg.Uid)
 
 	logger.Infof("User login, msg:%v", msg)
+
+	return &LoginResponse {Result: "success"}, nil
 }
