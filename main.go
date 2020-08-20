@@ -34,6 +34,7 @@ func configureBackend() {
 		component.WithName("router"),
 		component.WithNameFunc(strings.ToLower))
 
+	// MessageBus
 	busConfig := viper.New()
 	busConfig.SetDefault("rummy.redis.addr", "20.10.1.82:6379")
 	busConfig.SetDefault("rummy.redis.db", 3)
@@ -42,6 +43,14 @@ func configureBackend() {
 		logger.Log.Errorf("NewMessageBus failed, err:%v", err)
 	} else {
 		pitaya.RegisterModule(msgBus, "messageBus")
+	}
+
+	// DataCache
+	dataCache, err := modules.NewDataCache()
+	if err != nil {
+		logger.Log.Errorf("NewDataCache failed, err:%v", err)
+	} else {
+		pitaya.RegisterModule(dataCache, "dataCache")
 	}
 }
 

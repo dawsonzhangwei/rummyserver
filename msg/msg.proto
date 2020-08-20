@@ -1,0 +1,17 @@
+syntax = "proto3";
+package msg;
+
+// 登录请求
+// MsgId = 10001
+message LoginReq {
+    string uid = 1;
+    string nick = 2;
+    string channel = 3;
+}
+
+// 登录返回
+// MsgId = 50001
+message LoginRsp {
+    int32 code = 1;
+    string result = 2;
+}
