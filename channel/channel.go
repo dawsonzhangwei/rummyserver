@@ -5,5 +5,5 @@ import (
 )
 
 type ThirdChannel interface {
-	Login(map[string] string) (base.Player, interface{})
+	Login(map[string] string) (base.Player, error)
 }

@@ -7,7 +7,7 @@ type Player struct {
 	Ticket string `json:"ticket"`
 	Level string `json:"level"`
 	Check_point string `json:"check_point"`
-	PlayerId string `json:"playerId"`
+	UID string `json:"playerId"`
 	PlayerName string `json:"playerName"`
 	Current_game_server_id string `json:"current_game_server_id"`
 	Current_room_id string `json:"current_room_id"`

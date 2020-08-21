@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"time"
 	"context"
-	"strconv"
 
 	"github.com/topfreegames/pitaya"
 	"github.com/topfreegames/pitaya/component"
@@ -12,6 +11,8 @@ import (
 	"github.com/topfreegames/pitaya/timer"
 	"github.com/topfreegames/pitaya/groups"
 	"github.com/topfreegames/pitaya/config"
+
+	"rummy/base"
 )
 const (
 	ServerType = "connector"
@@ -48,7 +49,7 @@ type (
 	}
 
 	EnterGame struct {
-		Player []PlayerData `json:"player"`
+		Player []base.Player `json:"player"`
 		Token string `json:"token"`
 	}
 )

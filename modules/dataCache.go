@@ -14,11 +14,20 @@ const (
 	CacheKey_Player string = "player"
 )
 
+var Cache *DataCache
+
 type DataCache struct {
 	modules.Base
 
 	storage cache.Cache
 }
+
+func NewDataCache() *DataCache {
+	cache := &DataCache{
+	}
+	return cache
+}
+
 
 func (d *DataCache) Init() error {
 	c, err := cache.NewCache("memory", `{}`)
@@ -26,6 +35,7 @@ func (d *DataCache) Init() error {
 		logger.Log.Errorf("DataCache storage init failed, err:%v", err)
 	} else {
 		d.storage = c
+		Cache = d
 	}
 
 	return err
@@ -55,6 +65,6 @@ func (d *DataCache) GetPlayer(uid string) *base.Player {
 	return nil
 }
 
-func (d *DataCache) AddPlayer(uid string, player *base.Player) error {
-	return d.Put(CacheKey_Player, uid, player, 86400000*time.Second)
+func (d *DataCache) AddPlayer(player *base.Player) error {
+	return d.Put(CacheKey_Player, player.UID, player, 86400000*time.Second)
 }

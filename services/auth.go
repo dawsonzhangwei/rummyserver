@@ -6,8 +6,11 @@ import (
 	"github.com/topfreegames/pitaya"
 	"github.com/topfreegames/pitaya/component"
 
+	"rummy/channel"
 	"rummy/msg"
 	"rummy/modules"
+	"rummy/gameConst"
+	"rummy/base"
 )
 
 type Auth struct {
@@ -18,22 +21,23 @@ func NewAuth() *Auth {
 	return &Auth{}
 }
 
-func (a *Auth) Login(ctx context.Context, msg *msg.LoginReq)(*msg.LoginRsp, error) {
+func (a *Auth) Login(ctx context.Context, req *msg.LoginReq)(*msg.LoginRsp, error) {
 	logger := pitaya.GetDefaultLoggerFromCtx(ctx) // The default logger contains a requestId, the route being executed and the sessionId
 	s := pitaya.GetSessionFromCtx(ctx)
-	s.Bind(ctx, msg.Uid)
+	s.Bind(ctx, req.Uid)
 
-	logger.Infof("User login, msg:%v", msg)
+	logger.Infof("User login, msg:%v", req)
 
 	loginParam := make(map[string]string)
-	loginParam["uid"] = msg.GetUid()
-	loginParam["channel"] = msg.GetChannel()
+	loginParam["uid"] = req.GetUid()
+	loginParam["channel"] = req.GetChannel()
 
-	channel := a.getChannel(msg.GetChannel())
+	/*
+	channel := a.getChannel(req.GetChannel())
 	if channel == nil {
 		return &msg.LoginRsp {
 			Code : 500,
-			Result : fmt.Sprintf("channel:%v is not exist", msg.GetChannel()),
+			Result : fmt.Sprintf("channel:%v is not exist", req.GetChannel()),
 		}, nil
 	}
 
@@ -44,8 +48,14 @@ func (a *Auth) Login(ctx context.Context, msg *msg.LoginReq)(*msg.LoginRsp, erro
 			Result: err.Error(),
 		}, nil
 	}
+	*/
 
-	cache := getDataCache()
+	player := &base.Player{
+		UID: req.GetUid(),
+	}
+
+	modules.DB.LoadPlayer(player)
+	modules.Cache.AddPlayer(player)
 
 	return &msg.LoginRsp {Code: 200, Result: "success"}, nil
 }

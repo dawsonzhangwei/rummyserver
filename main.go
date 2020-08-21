@@ -19,6 +19,40 @@ import (
 )
 
 func configureBackend() {
+	//
+	// module
+	//
+
+	// MessageBus
+	busConfig := viper.New()
+	busConfig.SetDefault("rummy.redis.addr", "20.10.1.82:6379")
+	busConfig.SetDefault("rummy.redis.db", 3)
+	msgBus, err := modules.NewMessageBus(config.NewConfig(busConfig))
+	if err != nil {
+		logger.Log.Errorf("NewMessageBus failed, err:%v", err)
+	} else {
+		pitaya.RegisterModule(msgBus, "messageBus")
+	}
+
+	// DataCache
+	cache := modules.NewDataCache()
+	pitaya.RegisterModule(cache, "cache")
+
+	// Db
+	dbConfig := viper.New()
+	dbConfig.SetDefault("rummy.redis.addr", "20.10.1.82:6379")
+	dbConfig.SetDefault("rummy.redis.db", 3)
+	db, err := modules.NewDb(config.NewConfig(busConfig))
+	if err != nil {
+		logger.Log.Errorf("NewDb failed, err:%v", err)
+	} else {
+		pitaya.RegisterModule(db, "db")
+	}
+
+	//
+	// service 
+	//
+
 	auth := services.NewAuth()
 	pitaya.Register(auth,
 		component.WithName("auth"),
@@ -33,25 +67,6 @@ func configureBackend() {
 	pitaya.Register(router,
 		component.WithName("router"),
 		component.WithNameFunc(strings.ToLower))
-
-	// MessageBus
-	busConfig := viper.New()
-	busConfig.SetDefault("rummy.redis.addr", "20.10.1.82:6379")
-	busConfig.SetDefault("rummy.redis.db", 3)
-	msgBus, err := modules.NewMessageBus(config.NewConfig(busConfig))
-	if err != nil {
-		logger.Log.Errorf("NewMessageBus failed, err:%v", err)
-	} else {
-		pitaya.RegisterModule(msgBus, "messageBus")
-	}
-
-	// DataCache
-	dataCache, err := modules.NewDataCache()
-	if err != nil {
-		logger.Log.Errorf("NewDataCache failed, err:%v", err)
-	} else {
-		pitaya.RegisterModule(dataCache, "dataCache")
-	}
 }
 
 func configureFrontend(port int) {
