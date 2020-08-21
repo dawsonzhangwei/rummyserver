@@ -109,5 +109,16 @@ func configApp() *viper.Viper {
 	conf.SetDefault("pitaya.cluster.rpc.server.nats.connect", "nats://20.10.1.63:4222")
 	conf.SetDefault("pitaya.cluster.sd.etcd.endpoints", "20.10.1.63:2379")
 
+	defaultMap := map[string] interface{} {
+		"custom.redis.pre.url":                "redis://localhost:9010",
+		"custom.redis.pre.connectionTimeout":  10,
+		"custom.redis.post.url":               "redis://localhost:9010",
+		"custom.redis.post.connectionTimeout": 10,
+	}
+
+	for param := range defaultMap {
+		conf.SetDefault(param, defaultMap[param])
+	}
+	
 	return conf
 }
