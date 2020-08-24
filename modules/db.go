@@ -75,8 +75,7 @@ func (db *Db) LoadPlayer(player *base.Player) error {
 		return errors.New("paw redis get failed")
 	}
 
-	player.PlayerName = res["playerName"]
-	player.Coin = res["coin"]
+	player.SetAttr(res)
 
 	return nil
 }

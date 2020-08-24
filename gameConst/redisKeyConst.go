@@ -3,9 +3,8 @@ package gameConst
 const (
 	RedisKey_Player_Prefix string = "player:player_info:"
 
-	REDIS_GAME_CACHE string = "gameredis"
-	REDIS_ROOM_CACHE string = "roomredis"
-	REDIS_AGC_CACHE string = "agcredis"
+	REDIS_GAME_CACHE string = "gamecache"
+	REDIS_AGC_CACHE string = "agccache"
 
 	/**---------- agc cache start ----------*/
 

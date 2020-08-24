@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 	"context"
+	"errors"
 
 	"github.com/topfreegames/pitaya"
 	"github.com/topfreegames/pitaya/component"
@@ -13,6 +14,10 @@ import (
 	"github.com/topfreegames/pitaya/config"
 
 	"rummy/base"
+	"rummy/util"
+	"rummy/modules"
+	"rummy/gameConst"
+	"rummy/msg"
 )
 const (
 	ServerType = "connector"
@@ -82,6 +87,7 @@ func (r *Room) Join(ctx context.Context, req *JoinReq) (*JoinResponse, error) {
 	}
 
 	if len(uids) > 1 {
+		r.matchSuccess(uids);
 		pitaya.GroupBroadcast(ctx, ServerType, "room", "onNewUser", &NewUser{Content: fmt.Sprintf("New user: %v", s.UID())})
 	}
 	
@@ -101,4 +107,43 @@ func (r *Room) Message(ctx context.Context, msg *UserMessage) {
 	if err != nil {
 		fmt.Printf("GroupBroadcast err:%v", err)	
 	}
+}
+
+func (r *Room) matchSuccess(uids []string) error {
+	roomId := "6001"
+	gid := 30011
+
+	var players []*base.Player
+	var attrs []*msg.PlayerAttr
+	var tokens []string
+	for _, uid := range uids {
+		player := modules.Cache.GetPlayer(uid)
+		if player == nil {
+			logger.Log.Errorf("matchSuccess getPlayer failed by id:%v", uid)
+			return errors.New("GetPlayer failed")
+		}
+		token := util.GenerateToken(uid)
+		
+		util.InsertTokenInfo(token, uid, roomId)
+		util.SavePlayerInfoToGameCache(uid, player.GetCoin(), roomId, token)
+
+		players = append(players, player)
+		attrs = append(attrs, &player.PlayerAttr)
+		tokens = append(tokens, token)
+	}
+
+	err := util.SaveRoomInfoToGameCache(gid, roomId, players, tokens)
+	if err != nil {
+		return err
+	}
+
+	for idx, uid := range uids {
+		ntf := &msg.EnterGameNtf {
+			Players : attrs,
+			Token : tokens[idx],
+		}
+		pitaya.SendPushToUsers(gameConst.PushCmd_EnterGame, ntf, []string{uid}, "connector")
+	}
+
+	return nil
 }

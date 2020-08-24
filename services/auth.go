@@ -50,9 +50,8 @@ func (a *Auth) Login(ctx context.Context, req *msg.LoginReq)(*msg.LoginRsp, erro
 	}
 	*/
 
-	player := &base.Player{
-		UID: req.GetUid(),
-	}
+	player := &base.Player{}
+	player.UID = req.GetUid()
 
 	modules.DB.LoadPlayer(player)
 	modules.Cache.AddPlayer(player)

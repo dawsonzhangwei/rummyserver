@@ -100,7 +100,7 @@ func main() {
 func configApp() *viper.Viper {
 	conf := viper.New()
 	conf.SetEnvPrefix("rummy")
-	conf.SetDefault("pitaya.buffer.handler.localprocess", 15)
+	conf.SetDefault("pitaya.buffer.handler.localprocess", 1)
 	conf.SetDefault("pitaya.heartbeat.interval", "15s")
 	conf.SetDefault("pitaya.buffer.agent.messages", 32)
 	conf.SetDefault("pitaya.handler.messages.compression", false)
@@ -108,6 +108,16 @@ func configApp() *viper.Viper {
 	conf.SetDefault("pitaya.cluster.rpc.client.nats.connect", "nats://20.10.1.63:4222")
 	conf.SetDefault("pitaya.cluster.rpc.server.nats.connect", "nats://20.10.1.63:4222")
 	conf.SetDefault("pitaya.cluster.sd.etcd.endpoints", "20.10.1.63:2379")
+
+	conf.SetDefault("pitaya.cluster.sd.etcd.endpoints", "20.10.1.63:2379")
+	conf.SetDefault("pitaya.cluster.sd.etcd.endpoints", "20.10.1.63:2379")
+	conf.SetDefault("pitaya.cluster.sd.etcd.endpoints", "20.10.1.63:2379")
+
+	conf.SetDefault("rummy.redis.addr.gamecache", "20.10.1.62:6379")
+	conf.SetDefault("rummy.redis.db.gamecache", 3)
+
+	conf.SetDefault("rummy.redis.addr.agccache", "20.10.1.82:6379")
+	conf.SetDefault("rummy.redis.db.agccache", 3)
 
 	defaultMap := map[string] interface{} {
 		"custom.redis.pre.url":                "redis://localhost:9010",

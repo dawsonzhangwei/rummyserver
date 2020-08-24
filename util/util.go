@@ -20,7 +20,7 @@ func getPlayerGameCacheKey(uid string) string {
 	return fmt.Sprintf("%s%s", gameConst.GAME_CACHE_PLAYER_CACHE, uid)
 }
 
-func savePlayerInfoToGameCache(uid string, coin int, room_id string, token string) error {
+func SavePlayerInfoToGameCache(uid string, coin int, room_id string, token string) error {
 	client, err := redis.GetRedis(gameConst.REDIS_GAME_CACHE, pitaya.GetConfig())
 	if err != nil {
 		return err	
@@ -70,8 +70,8 @@ func myMD5(params ...string) string {
 	return str
 }
 	
-func saveRoomInfoToGameCache(gid int, roomId string, room_id string, players []*base.Player, tokens []string) error {
-	client, err := redis.GetRedis(gameConst.REDIS_ROOM_CACHE, pitaya.GetConfig())
+func SaveRoomInfoToGameCache(gid int, roomId string, players []*base.Player, tokens []string) error {
+	client, err := redis.GetRedis(gameConst.REDIS_GAME_CACHE, pitaya.GetConfig())
 	if err != nil {
 		return err	
 	} else {
@@ -105,7 +105,7 @@ func saveRoomInfoToGameCache(gid int, roomId string, room_id string, players []*
 			"HallSvrId": 0, 
 			"DateTime": time.Now().Unix(), 
 			"fieldId": gameConst.GAME_FIELD_ID_TWO,
-			"uniqueId": myMD5(fmt.Sprintf("%v%v", time.Now().Unix(), room_id)),
+			"uniqueId": myMD5(fmt.Sprintf("%v%v", time.Now().Unix(), roomId)),
 			"AgainstType": 0,
 		}
 
@@ -116,7 +116,7 @@ func saveRoomInfoToGameCache(gid int, roomId string, room_id string, players []*
 	}
 }
 
-func insertTokenInfo( token_id string, uid string, room_id string) error {
+func InsertTokenInfo( token_id string, uid string, room_id string) error {
 	client, err := redis.GetRedis(gameConst.REDIS_GAME_CACHE, pitaya.GetConfig())
 	if err != nil {
 		return err	
@@ -128,7 +128,7 @@ func insertTokenInfo( token_id string, uid string, room_id string) error {
 			"RoomID": room_id,
 			"Ip": "127.0.0.1",
 			"ShowID": room_id,
-			"Position": 0,
+			"Position": "0",
 			"RoomAllocTime": time.Now().Unix(),
 			"RedisIp": "127.0.0.1", 
 			"RedisPort": "6379", 
@@ -153,6 +153,6 @@ func storePlayerInfo(uid string, data map[string]interface{}) error {
 	}
 }
 
-func generateToken(key string) string {
+func GenerateToken(key string) string {
 	return myMD5(key)
 }

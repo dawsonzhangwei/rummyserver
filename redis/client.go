@@ -45,6 +45,8 @@ func GetRedis(
 		if err != nil {
 			return nil, fmt.Errorf("redis ping failed, prefix:%v, err:%v", prefix, err)
 		}
+
+		clients[prefix] = rdb
 	}
 
 	return clients[prefix], nil

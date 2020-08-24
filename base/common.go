@@ -1,6 +1,17 @@
 package base
 
+import (
+	"strconv"
+
+	"rummy/msg"
+)
+
 type Player struct {
+	msg.PlayerAttr
+
+	UID string
+
+	/*
 	Clover string `json:"clover"`
 	Life string `json:"life"`
 	Coin string `json:"coin"`
@@ -21,4 +32,23 @@ type Player struct {
 	Win_num string `json:"win_num"`
 	Item_ddz string `json:"item_ddz"`
 	Played_player string `json:"played_player"`
+	*/
+}
+
+
+func (player *Player) SetAttr(data map[string] string) {
+	player.Attrs = data
+}
+
+func (player *Player) GetCoin() int {
+	if c, ok := player.Attrs["coin"]; ok {
+		coin, err := strconv.Atoi(c)
+		if err != nil {
+			coin = 0
+		}
+
+		return coin
+	}
+
+	return 0
 }
